@@ -6,12 +6,20 @@ import static test.Dish.Type.FISH;
 import static test.Dish.Type.MEAT;
 import static test.Dish.Type.OTHER;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import test.Trader.Transaction;
 
 public class Main {
@@ -33,8 +41,6 @@ public class Main {
         .distinct()
         .collect(toList());
 
-    System.out.println(collect);
-
     List<Integer> num1 = new ArrayList<>(Arrays.asList(1, 2, 3));
     List<Integer> num2 = new ArrayList<>(Arrays.asList(3, 4));
 
@@ -44,13 +50,9 @@ public class Main {
             .map(n2 -> new ArrayList<>(Arrays.asList(n1, n2))))
         .collect(toList());
 
-    System.out.println(collect1);
-
     Integer reduce = menu.stream()
         .map(dish -> 1)
         .reduce(0, Integer::sum);
-
-    System.out.println(reduce);
 
     Trader raoul = Trader.of("Raoul", "Cambridge");
     Trader mario = Trader.of("Mario", "Milan");
@@ -66,54 +68,39 @@ public class Main {
         Transaction.of(alan, 2012, 950)
     ));
 
-    List<Transaction> q1 = transactions.stream()
-        .filter(tr -> tr.getYear() == 2011)
-        .sorted(comparing(Transaction::getValue))
-        .collect(toList());
-
-    System.out.println(q1);
-
-    List<String> q2 = transactions.stream()
-        .map(Transaction::getTrader)
-        .map(Trader::getCity)
-        .distinct()
-        .collect(toList());
-
-    System.out.println(q2);
-
-    List<Trader> q3 = transactions.stream()
-        .map(Transaction::getTrader)
-        .filter(trader -> trader.getCity().equals("Cambridge"))
-        .sorted(comparing(Trader::getName))
-        .distinct()
-        .collect(toList());
-
-    System.out.println(q3);
-
-    List<String> q4 = transactions.stream()
-        .map(tr -> tr.getTrader().getName())
-        .distinct()
-        .sorted(String::compareTo)
-        .collect(toList());
-
-    System.out.println(q4);
-
-    boolean q5 = transactions.stream()
-        .anyMatch(tr -> tr.getTrader().getCity().equals("Milan"));
-
-    System.out.println(q5);
-
-    transactions.stream()
-        .filter(tr -> tr.getTrader().getCity().equals("Cambridge"))
-        .forEach(tr -> System.out.println(tr.getValue()));
-
-    Optional<Integer> q7 = transactions.stream()
-        .map(Transaction::getValue)
-        .reduce(Integer::max);
-
     Optional<Transaction> min = transactions.stream()
         .min(comparing(Transaction::getValue));
 
+    int calorieSum = menu.stream()
+        .mapToInt(Dish::getCalories)
+        .sum();
+
+    System.out.println(calorieSum);
+
+    long count = IntStream.rangeClosed(1, 100)
+        .filter(n -> n % 2 == 0)
+        .count();
+
+    System.out.println(count);
+
+    Stream.of("Modern", "Java", "In", "Action")
+        .map(String::toUpperCase)
+        .forEach(System.out::println);
+
+    Stream<Object> empty = Stream.empty();
+
+    long uniqueWords = 0;
+    try(Stream<String> lines = Files.lines(Paths.get("/data.txt"), StandardCharsets.UTF_8)) {
+      uniqueWords = lines.flatMap(line -> Arrays.stream(line.split("\\^")))
+          .distinct()
+          .count();
+    } catch (IOException e) {
+      //
+    }
+
+    Stream.iterate(0, n -> n + 2)
+        .limit(10)
+        .forEach(System.out::println);
   }
 
 }
