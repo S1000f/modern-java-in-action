@@ -1,23 +1,21 @@
 package test;
 
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 import static test.Dish.Type.FISH;
 import static test.Dish.Type.MEAT;
 import static test.Dish.Type.OTHER;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
+import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import test.Trader.Transaction;
@@ -35,6 +33,30 @@ public class Main {
         Dish.of("prawns", false, 300, FISH),
         Dish.of("salmon", false, 450, FISH)
     ));
+
+    final Comparator<Dish> dishComparator = Comparator.comparingInt(Dish::getCalories);
+
+    final Optional<Dish> collect2 = menu.stream()
+        .collect(maxBy(dishComparator));
+
+    final IntSummaryStatistics collect3 = menu.stream()
+        .collect(summarizingInt(Dish::getCalories));
+
+    final String joining = menu.stream()
+        .map(Dish::getName)
+        .collect(joining(", "));
+
+    System.out.println(joining);
+
+    final Integer caloriesSum = menu.stream()
+        .collect(reducing(0, Dish::getCalories, (a, b) -> a + b));
+
+    final Integer caloriesSum2 = menu.stream()
+        .map(Dish::getCalories)
+        .reduce(0, Integer::sum);
+
+    final Optional<Dish> mostCalorie = menu.stream()
+        .reduce((a, b) -> a.getCalories() > b.getCalories() ? a : b);
 
     List<String> collect = new ArrayList<>(Arrays.asList("Hello", "World")).stream()
         .flatMap(word -> Arrays.stream(word.split("")))
@@ -75,13 +97,9 @@ public class Main {
         .mapToInt(Dish::getCalories)
         .sum();
 
-    System.out.println(calorieSum);
-
     long count = IntStream.rangeClosed(1, 100)
         .filter(n -> n % 2 == 0)
         .count();
-
-    System.out.println(count);
 
     Stream.of("Modern", "Java", "In", "Action")
         .map(String::toUpperCase)
