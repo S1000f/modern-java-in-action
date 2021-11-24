@@ -64,7 +64,7 @@ public final class ExampleCompletableFuture {
         .collect(toList());
 
     // 스트림 연산은 게으른 연산이므로, 하나의 파이프라인이 아니라 비동기의 결과를 취합하는 파이프라인을 별도로 분리한다
-    // join 메소드는 예외를 발생시키지 않는다 - try/catch 불필요
+    // join 메소드는 unchecked exception 을 사용한다 - try/catch 불필요
     return collect.stream()
         .map(CompletableFuture::join)
         .collect(toList());
