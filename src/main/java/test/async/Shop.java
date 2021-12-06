@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import test.async.Discount.Code;
 
 @EqualsAndHashCode
 @ToString
@@ -51,6 +52,15 @@ public final class Shop {
   // 위의 메소드와 작동 및 예외처리까지 완전히 동일하다
   public Future<Double> getPriceAsync2(String product) {
     return CompletableFuture.supplyAsync(() -> calculatePrice(product));
+  }
+
+  public String getPriceWithDiscount(String product) {
+    final double price = calculatePrice(product);
+
+    SecureRandom random = new SecureRandom();
+    Discount.Code code = Discount.Code.values()[random.nextInt(Code.values().length)];
+
+    return String.format("%s:%.2f:%s", shopName, price, code);
   }
 
   private double calculatePrice(String product) {
