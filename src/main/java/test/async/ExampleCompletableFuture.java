@@ -106,6 +106,17 @@ public final class ExampleCompletableFuture {
       return thread;
     });
 
+    // noGood
+    // 아래와 거의 같아보이지만, 스트림의 게으른 연산 특성 때문에 1 ~ 2 부분에서 순차 계산이 이뤄지므로 온전한 비동기가 아니다
+    final List<CompletableFuture<String>> noGood = shops.stream()
+        .map(sh -> CompletableFuture.supplyAsync(() -> sh.getPriceWithDiscount(product), executor))
+        .map(CompletableFuture::join) // 1
+        .map(Quote::parse) // 2
+        .map(quote -> CompletableFuture.supplyAsync(() -> Discount.applyDiscount(quote), executor))
+        .collect(toList());
+
+    // good
+    // 파이프중간에 join 연산을 빼고, thenApply, thenCompose 를 이용한다
     final List<CompletableFuture<String>> collect = shops.stream()
         .map(shop -> CompletableFuture.supplyAsync(() -> shop.getPriceWithDiscount(product), executor))
         .map(future -> future.thenApply(Quote::parse))
