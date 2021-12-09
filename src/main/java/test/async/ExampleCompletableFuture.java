@@ -2,19 +2,31 @@ package test.async;
 
 import static java.util.stream.Collectors.toList;
 
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.stream.Stream;
 
 public final class ExampleCompletableFuture {
 
   public static void delay() {
     try {
       Thread.sleep(1000L);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static void randomDelay() {
+    SecureRandom random = new SecureRandom();
+    int delay = 500 + random.nextInt(2000);
+
+    try {
+      Thread.sleep(delay);
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
@@ -44,11 +56,6 @@ public final class ExampleCompletableFuture {
 
     long retrievalTime = ((System.nanoTime() - start) / 1_000_000);
     System.out.println("price returned after " + retrievalTime + " milli");
-  }
-
-  public void withStreamExample() {
-    final List<Shop> shops = Arrays.asList(Shop.of("BestShopEver"), Shop.of("LetsBuy"), Shop.of("MyFavoriteShop"),
-        Shop.of("BuyItAll"));
   }
 
   // 동기 API + 병렬 스트림
@@ -89,6 +96,28 @@ public final class ExampleCompletableFuture {
         .collect(toList());
   }
 
+  public void withStreamExample() {
+    final List<Shop> shops = Arrays.asList(Shop.of("BestShopEver"), Shop.of("LetsBuy"), Shop.of("MyFavoriteShop"),
+        Shop.of("BuyItAll"));
+
+    // 비동기 처리 후 결과물을 출력
+    findPricesWithDiscount2(shops, "MyPhone")
+        .forEach(System.out::println);
+
+    // Future Stream 을 직접 받아서 처리하기 1
+    // thenAccept 를 통해 결과물을 어떻게 소비할지 미리 지정하였으므로, 연산이 끝나는 순서대로 결과물을 출력한다.
+    findPricesStream(shops, "MyPhone")
+        .forEach(f -> f.thenAccept(System.out::println));
+
+    // Future Stream 을 직접 받아서 처리하기 2
+    // thenAccept 를 지정 후 배열로 모으고, allOf 메서드에 인자로 전달 후 join 을 호출하면 모든 연산이 종료되길 기다린 후에 결과를 출력한다
+    final CompletableFuture<Void> myPhone1 = CompletableFuture.allOf(findPricesStream(shops, "MyPhone")
+        .map(f -> f.thenAccept(System.out::println))
+        .toArray(CompletableFuture[]::new));
+
+    CompletableFuture.allOf(myPhone1).join();
+  }
+
   // 동기화 스트림 파이프라인
   public static List<String> findPricesWithDiscount(List<Shop> shops, String product) {
     return shops.stream()
@@ -127,6 +156,13 @@ public final class ExampleCompletableFuture {
     return collect.stream()
         .map(CompletableFuture::join)
         .collect(toList());
+  }
+
+  public static Stream<CompletableFuture<String>> findPricesStream(List<Shop> shops, String product) {
+    return shops.stream()
+        .map(shop -> CompletableFuture.supplyAsync(() -> shop.getPriceWithDiscount(product)))
+        .map(future -> future.thenApply(Quote::parse))
+        .map(future -> future.thenCompose(quote -> CompletableFuture.supplyAsync(() -> Discount.applyDiscount(quote))));
   }
 
 }

@@ -1,12 +1,8 @@
 package test.async;
 
-import static java.util.stream.Collectors.toList;
-
 import java.security.SecureRandom;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -64,7 +60,7 @@ public final class Shop {
   }
 
   private double calculatePrice(String product) {
-    ExampleCompletableFuture.delay();
+    ExampleCompletableFuture.randomDelay();
     SecureRandom random = new SecureRandom();
 
     return random.nextDouble() * product.charAt(0) + product.charAt(1);
