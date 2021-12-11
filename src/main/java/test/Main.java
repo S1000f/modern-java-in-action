@@ -1,11 +1,11 @@
 package test;
 
-import test.async.reactive.ExampleReactive;
+import test.stream.ExampleStream;
 
 public class Main {
   public static void main(String[] args) {
 
-    ExampleReactive.example();
+    ExampleStream.exampleGrouping();
 
 
   }

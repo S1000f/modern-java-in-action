@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.ToString;
 
 @EqualsAndHashCode
-@ToString
+@ToString(of = {"name", "type"})
 @Getter
 @Builder
 @AllArgsConstructor
