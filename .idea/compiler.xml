@@ -7,11 +7,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="consoleTest" />
+        <module name="modern-java-in-action" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="consoleTest" target="9" />
+      <module name="modern-java-in-action" target="9" />
     </bytecodeTargetLevel>
   </component>
 </project>
