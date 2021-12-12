@@ -9,6 +9,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.maxBy;
+import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.reducing;
 import static java.util.stream.Collectors.summarizingInt;
 import static java.util.stream.Collectors.toList;
@@ -71,6 +72,43 @@ public class ExampleStream {
     FAT
   }
 
+  public static boolean isPrime(int candidate) {
+    int candidateRoot = (int) Math.sqrt(candidate);
+
+    return IntStream.rangeClosed(2, candidateRoot)
+        .noneMatch(i -> candidate % i == 0);
+  }
+
+  public static void examplePartitoning() {
+    final Map<Boolean, List<Dish>> vegeOrNot = menu.stream()
+        .collect(partitioningBy(Dish::isVegetarian));
+
+    final List<Dish> vegeMenu = vegeOrNot.get(true);
+
+    final List<Dish> vegeMenu2 = menu.stream()
+        .filter(Dish::isVegetarian)
+        .collect(toList());
+
+    System.out.println(vegeMenu);
+    System.out.println(vegeMenu2);
+
+    // partitioning 역시 Collectors 의 정적 메소드들을 여러번 지정 할 수 있다.
+    final Map<Boolean, Dish> mostCaloricPartitionedByVerge = menu.stream()
+        .collect(partitioningBy(Dish::isVegetarian,
+            collectingAndThen(maxBy(comparingInt(Dish::getCalories)), Optional::get)));
+
+    System.out.println(mostCaloricPartitionedByVerge);
+
+    int n = 40;
+
+    final Map<Boolean, List<Integer>> collect = IntStream.rangeClosed(2, n)
+        .boxed()
+        .collect(partitioningBy(ExampleStream::isPrime));
+
+    System.out.println(collect);
+
+  }
+
   public static void exampleGrouping() {
     final Map<Type, List<Dish>> dishesByType = menu.stream()
         .collect(groupingBy(Dish::getType));
@@ -105,10 +143,6 @@ public class ExampleStream {
     // collectingAndThen 은 thenApply 와 비슷한 역할
     final Map<Type, Dish> collect4 = menu.stream()
         .collect(groupingBy(Dish::getType, collectingAndThen(maxBy(comparingInt(Dish::getCalories)), Optional::get)));
-
-
-
-
   }
 
   public static void examples() {
