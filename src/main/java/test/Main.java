@@ -1,11 +1,11 @@
 package test;
 
-import test.stream.ExampleStream;
+import test.fp.ExampleFunctional;
 
 public class Main {
   public static void main(String[] args) {
 
-    ExampleStream.exampleCollectionMethods();
+    ExampleFunctional.examples();
 
 
   }
